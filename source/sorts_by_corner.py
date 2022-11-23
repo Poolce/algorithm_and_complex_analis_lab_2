@@ -1,6 +1,6 @@
 import numpy as np
 import source.functions as fun
-import source.avl_tree as avl
+import source.avl_tree.avl as avl
 import source.merge_sort_four as mg
 import source.red_black_tree.rb_tree as rb
 

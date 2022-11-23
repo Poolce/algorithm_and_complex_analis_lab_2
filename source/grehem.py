@@ -15,7 +15,6 @@ def grehem(arr,sort_func):
     shell.insert(0,sorted_dots[-1])
 
     index=0
-    print(shell)
     while index < len(sorted_dots):
         vec1=fun.get_vector(arr[shell[-2]], arr[shell[-1]])
         vec2=fun.get_vector(arr[shell[-1]], arr[sorted_dots[index]])
