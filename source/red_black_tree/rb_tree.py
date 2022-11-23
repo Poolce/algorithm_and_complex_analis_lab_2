@@ -1,52 +1,74 @@
-class RBNode:
-    def __init__ (self, val):
-        self.red = False
+class Node():
+    def __init__(self, item, index):
+        self.item = item
+        self.index = index
         self.parent = None
-        self.val = val
         self.left = None
         self.right = None
+        self.color = 1
 
 
-class RBTree:
-    def __init__ (self):
-        self.nil = RBNode(0)
-        self.nil.red = False
-        self.nil.left = None
-        self.nil.right = None
-        self.root = self.nil
+class RedBlackTree():
+    def __init__(self):
+        self.TNULL = Node(None,None)
+        self.TNULL.color = 0
+        self.TNULL.left = None
+        self.TNULL.right = None
+        self.root = self.TNULL
 
-    def insert(self, val):
-        new_node = RBNode(val)
-        new_node.parent = None
-        new_node.left = self.nil
-        new_node.right = self.nil
-        new_node.red = True
-
-        parent = None
-        current = self.root
-        while current != self.nil:
-            parent = current
-            if new_node.val < current.val:
-                current = current.left
-            elif new_node.val > current.val:
-                current = current.right
+    # Balance the tree after insertion
+    def fix_insert(self, k):
+        while k.parent.color == 1:
+            if k.parent == k.parent.parent.right:
+                u = k.parent.parent.left
+                if u.color == 1:
+                    u.color = 0
+                    k.parent.color = 0
+                    k.parent.parent.color = 1
+                    k = k.parent.parent
+                else:
+                    if k == k.parent.left:
+                        k = k.parent
+                        self.right_rotate(k)
+                    k.parent.color = 0
+                    k.parent.parent.color = 1
+                    self.left_rotate(k.parent.parent)
             else:
-                return
+                u = k.parent.parent.right
 
-        new_node.parent = parent
-        if parent == None:
-            self.root = new_node
-        elif new_node.val < parent.val:
-            parent.left = new_node
-        else:
-            parent.right = new_node
+                if u.color == 1:
+                    u.color = 0
+                    k.parent.color = 0
+                    k.parent.parent.color = 1
+                    k = k.parent.parent
+                else:
+                    if k == k.parent.right:
+                        k = k.parent
+                        self.left_rotate(k)
+                    k.parent.color = 0
+                    k.parent.parent.color = 1
+                    self.right_rotate(k.parent.parent)
+            if k == self.root:
+                break
+        self.root.color = 0
 
-        self.fix_insert(new_node)
-    
-    def rotate_left(self, x):
+    # Printing the tree
+    def sort_list_by_rb(self, root):
+        res=[]
+        if root.left is not None: 
+            res += self.sort_list_by_rb(root.left)
+        if(root.item != None):
+            res.append(root.index)
+
+        if root.right is not None:
+            res += self.sort_list_by_rb(root.right)
+        return res
+
+
+    def left_rotate(self, x):
         y = x.right
         x.right = y.left
-        if y.left != self.nil:
+        if y.left != self.TNULL:
             y.left.parent = x
 
         y.parent = x.parent
@@ -58,11 +80,11 @@ class RBTree:
             x.parent.right = y
         y.left = x
         x.parent = y
-    
-    def rotate_right(self, x):
+
+    def right_rotate(self, x):
         y = x.left
         x.left = y.right
-        if y.right != self.nil:
+        if y.right != self.TNULL:
             y.right.parent = x
 
         y.parent = x.parent
@@ -75,43 +97,42 @@ class RBTree:
         y.right = x
         x.parent = y
 
-    def fix_insert(self, new_node):
-        while new_node != self.root and new_node.parent.red:
-            if new_node.parent == new_node.parent.parent.right:
-                u = new_node.parent.parent.left # uncle
-                if u.red:
+    def insert(self, key,index):
+        node = Node(key,index)
+        node.parent = None
+        node.item = key
+        node.index = index
+        node.left = self.TNULL
+        node.right = self.TNULL
+        node.color = 1
 
-                    u.red = False
-                    new_node.parent.red = False
-                    new_node.parent.parent.red = True
-                    new_node = new_node.parent.parent
-                else:
-                    if new_node == new_node.parent.left:
-                        new_node = new_node.parent
-                        self.rotate_right(new_node)
-                    new_node.parent.red = False
-                    new_node.parent.parent.red = True
-                    self.rotate_left(new_node.parent.parent)
+        y = None
+        x = self.root
+
+        while x != self.TNULL:
+            y = x
+            if node.item < x.item:
+                x = x.left
             else:
-                u = new_node.parent.parent.right # uncle
+                x = x.right
 
-                if u.red:
-                    u.red = False
-                    new_node.parent.red = False
-                    new_node.parent.parent.red = True
-                    new_node = new_node.parent.parent
-                else:
-                    if new_node == new_node.parent.right:
-                        new_node = new_node.parent
-                        self.rotate_left(new_node)
-                    new_node.parent.red = False
-                    new_node.parent.parent.red = True
-                    self.rotate_right(new_node.parent.parent)
-        self.root.red = False
+        node.parent = y
+        if y == None:
+            self.root = node
+        elif node.item < y.item:
+            y.left = node
+        else:
+            y.right = node
 
-    def print_tree(node, lines, level=0):
-        if node.val != 0:
-            print_tree(node.left, lines, level + 1)
-            lines.append('-' * 4 * level + '> ' +
-                        str(node.val) + ' ' + ('r' if node.red else 'b'))
-            print_tree(node.right, lines, level + 1)
+        if node.parent == None:
+            node.color = 0
+            return
+
+        if node.parent.parent == None:
+            return
+
+        self.fix_insert(node)
+    
+    def print_tree(self):
+        res = self.__print_helper()
+        return res
